@@ -213,10 +213,8 @@ int logicalShift(int x, int n) {
  *   Rating: 4
  */
 int swapNibblePairs(int x) {
-  int mask = 0xFF ^ (0xFF << 4);
-  mask = mask | mask << 16;
-  x = (x & mask) << 4 | (x & ~mask) >> 4;
-  return x;
+  int mask = 0x0F | (0x0F << 8) | (0x0F << 16) | (0x0F << 24);
+  return ((x >> 4) & mask) | ((x & mask) << 4);
 }
 
 // P7
@@ -264,9 +262,9 @@ int oddParity(int x) {
  */
 int rotateRightBits(int x, int n) {
   n = n & 31;
-  int mask = ~(((1 << 31) >> n) >> 1);
-  int right = x >> n & mask;
-  int left = x << (~n + 1) & 31;
+  int mask = ~(((1 << 31) >> n) << 1);
+  int right = (x >> n) & mask;
+  int left = x << ((~n + 1) & 31);
   return left | right;
 }
 
@@ -335,38 +333,29 @@ int midpointTowardFirst(int x, int y) {
  *   Rating: 7
  */
 int isBetweenEitherOrder(int x, int a, int b) {
-  int sign = 1 << 31;
-  int xp = x ^ sign;
-  int ap = a ^ sign;
-  int bp = b ^ sign;
+  int sa = a >> 31;
+  int sb = b >> 31;
+  int sx = x >> 31;
 
-  // a <= x
-  int diff_ax = ap + ~xp + 1;
-  int lt_ax = (diff_ax >> 31) & 1;
+  int nx = ~x;
+
+  int da = a + nx + 1;       // a - x
+  int db = b + nx + 1;       // b - x
+  int dxa = ~da + 1;         // x - a
+  int dxb = ~db + 1;         // x - b
+
+  int dax = sa ^ sx;
+  int dbx = sb ^ sx;
+
   int eq_ax = !(a ^ x);
-  int le_ax = lt_ax | eq_ax;
-
-  // x <= b
-  int diff_xb = xp + ~bp + 1;
-  int lt_xb = (diff_xb >> 31) & 1;
-  int eq_xb = !(x ^ b);
-  int le_xb = lt_xb | eq_xb;
-
-  // b <= x
-  int diff_bx = bp + ~xp + 1;
-  int lt_bx = (diff_bx >> 31) & 1;
   int eq_bx = !(b ^ x);
-  int le_bx = lt_bx | eq_bx;
 
-  // x <= a
-  int diff_xa = xp + ~ap + 1;
-  int lt_xa = (diff_xa >> 31) & 1;
-  int eq_xa = !(x ^ a);
-  int le_xa = lt_xa | eq_xa;
+  int le_ax = (dax & sa) | (~dax & ((da >> 31) | eq_ax));
+  int le_bx = (dbx & sb) | (~dbx & ((db >> 31) | eq_bx));
+  int le_xa = (dax & sx) | (~dax & ((dxa >> 31) | eq_ax));
+  int le_xb = (dbx & sx) | (~dbx & ((dxb >> 31) | eq_bx));
 
-  int cond1 = le_ax & le_xb;
-  int cond2 = le_bx & le_xa;
-  return cond1 | cond2;
+  return ((le_ax & le_xb) | (le_bx & le_xa)) & 1;
 }
 
 // P13
@@ -583,11 +572,12 @@ unsigned float_i2f(int x) {
   if (x == 0) return 0;
 
   unsigned sign = x & 0x80000000;
+  unsigned ux = x;
   unsigned abs_x;
   if (x < 0) {
-    abs_x = -((unsigned)x);
+    abs_x = ~ux + 1;
   } else {
-    abs_x = (unsigned)x;
+    abs_x = ux;
   }
 
   int e = 0;
