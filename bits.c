@@ -2,7 +2,7 @@
  * CS:APP Data Lab 
  * 
  * <Please put your name and userid here>
- * 
+ * 杨睿童 25800190030 
  * bits.c - Source file with your solutions to the Lab.
  *          This is the file you will hand in to your instructor.
  *
@@ -213,7 +213,7 @@ int logicalShift(int x, int n) {
  *   Rating: 4
  */
 int swapNibblePairs(int x) {
-  mask = 0xFF ^ (0xFF << 4);
+  int mask = 0xFF ^ (0xFF << 4);
   mask = mask | mask << 16;
   x = (x & m) << 4 | (x & ~m) >> 4;
   return x;
@@ -264,9 +264,9 @@ int oddParity(int x) {
  */
 int rotateRightBits(int x, int n) {
   n = n & 31;
-  mask = ~(((1 << 31) >> n) >> 1);
-  right = x >> n & mask;
-  left = x << (~n + 1) & 31;
+  int mask = ~(((1 << 31) >> n) >> 1);
+  int right = x >> n & mask;
+  int left = x << (~n + 1) & 31;
   return left | right;
 }
 
