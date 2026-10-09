@@ -215,7 +215,7 @@ int logicalShift(int x, int n) {
 int swapNibblePairs(int x) {
   int mask = 0xFF ^ (0xFF << 4);
   mask = mask | mask << 16;
-  x = (x & m) << 4 | (x & ~m) >> 4;
+  x = (x & mask) << 4 | (x & ~mask) >> 4;
   return x;
 }
 
@@ -232,7 +232,7 @@ int secondLowestZeroBit(int x) {
   int first = ~x & (x + 1);
   x = x | first;
   int second = ~x & (x + 1);
-  return x;
+  return second;
 }
 
 // P8
@@ -665,8 +665,6 @@ int bitCount(int x) {
  */
 int bitReverse(int x)
 {
-int bitReverse(int x)
-{
   int mask = (0xFF << 8) | 0xFF;
 
   x = ((x >> 16) & mask) | (x << 16);
@@ -684,5 +682,4 @@ int bitReverse(int x)
   x = ((x >> 1) & mask) | ((x & mask) << 1);
 
   return x;
-}
 }
